@@ -1,66 +1,103 @@
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Table of Content
 
-## About Laravel
+ - [Introduction](#introduction)
+ - [Requirement](#requirement)
+ - [Installation](#installation)
+ - [Laravel scout setup](#scout)
+ - [Usage](#usage)
+ - [License](#license) 
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+ ## Introduction 
+ 
+Develop a Laravel API featuring a Post model. 
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The Post model is restricted to the following fields: `id, user_id, title, body, is_published (boolean), created_at, and updated_at`.
 
-## Learning Laravel
+The application is equipped with two endpoints:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+* Create Post Endpoint:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+    * Endpoint: POST /post
+    * Purpose: Create new posts using this endpoint.
+    * Search Posts Endpoint:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Endpoint: `GET /user/{userId}/posts/search?term={abc}&is_published=1`
 
-## Laravel Sponsors
+Purpose: Retrieve a paginated list of posts based on specified criteria.
+Parameters:
+`{userId}`: The ID of the user whose posts are being searched.
+term: The search term to filter posts.
+is_published: Boolean parameter indicating whether to include only published posts (1 for true, 0 for false).
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Search Functionality:
 
-### Premium Partners
+Upon the creation of each post, the system should automatically indexes it.
+Utilize Laravel Scout for the indexing part with any engine of your choice.
+Retrieving the data should also be utilizing ***Laravel Scout***.
+The `/user/{userId}/posts/search` endpoint returns a paginated list of posts only if they meet the specified criteria of matching the search term, user ID, and published status.
+This setup ensures a streamlined process for creating posts and an efficient search mechanism that considers user-specific criteria, term matching, and publication status.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Requirement
 
-## Code of Conduct
+PHP >= 8.1
+   
+ 
+ ## Installation
+    git clone git@github.com:holoyan/posts.git
+    cd posts
+    composer install
+    cp .env.example .env
+    php artisan key:generate
+    // set db credentials
+    php artisan migrate
+    
+    php artisan serve 
+    
+## Scout
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+As a [Laravel Scout](https://laravel.com/docs/10.x/scout) driver used [tntsearch](https://github.com/teamtnt/laravel-scout-tntsearch-driver)
+Make sure you have proper permission for `storage` folder
+> Important: "storage" settings marks the folder where all of your indexes will be saved so make sure to have permission to write to this folder otherwise you might expect the following exception thrown:
+  [PDOException] SQLSTATE[HY000] [14] unable to open database file *
 
-## Security Vulnerabilities
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+if you need fuzzy match set `TNTSEARCH_FUZZINESS=true` in .env file
+if you want to use `queue` for indexing, setup queue driver...
 
+    
+ ## Usage
+ 
+ To create post use 
+ 
+ 
+ ```
+curl --location --request POST 'http://<DOMAIN>/api/posts' \
+--header 'Accept: application/json' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "user_id": 3,
+  "title": "Aut voluptates non est quisquam voluptatibus voluptas qui id.",
+  "body": "Officia ea omnis omnis ad. Reiciendis quia et fuga corporis distinctio. Quo ad facilis natus est sapiente cupiditate praesentium. Placeat fugiat et ut eum enim error nisi odit.",
+  "is_published": true
+}'
+
+```
+
+to perform search use
+
+```
+curl --location --request GET 'http://<DOMAIN>/api/users/3/posts/search?term=Reiciendis&is_published=0' \
+--header 'Accept: application/json'
+```
+
+You can pass `perPage` and `page` query params to customize response page and length
+If you need to customize response structure check `app\Http\Resources\Posts\PostResource.php` file. For more info check [docs](https://laravel.com/docs/10.x/eloquent-resources) 
+ 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT

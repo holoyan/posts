@@ -15,6 +15,13 @@ class PostResource extends JsonResource
     public function toArray(Request $request): array
     {
         // modify fields which need to be returned
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'body' => $this->body,
+            'userId' => $this->userId,
+            'isPublished' => $this->is_published,
+            'updateAt' => $this->updated_at->toDateTimeString(),
+        ];
     }
 }
